@@ -4,7 +4,8 @@ import sys
 parameters = {
     "l": {"name": "Logging", "description": "Logging if it True", "type": "boolean", "default_value": False},
     "p": {"name": "Port", "description": "The port which application listen", "type": "integer", "default_value": 0},
-    "d": {"name": "Directory", "description": "The directory used by application datas", "type": "string", "default_value": ""}
+    "d": {"name": "Directory", "description": "The directory used by application datas", "type": "string", "default_value": ""},
+    "error": {"name": "Error", "description": "A flag is unknow", "type": "error", "default_value": "error"}
 }
 
 
@@ -25,7 +26,7 @@ def getDefaultValue(flag):
 
 
 def getArgsDictFromList(argsList):
-    "Return a Dict of [arg: [parameters]] or [arg: True]. TODO: Check if flag exist in parameters"
+    "Return a Dict of [arg: [parameters]] or [arg: True]."
 
     argsDict = {}
 
@@ -39,6 +40,10 @@ def getArgsDictFromList(argsList):
             if arg.isdigit() and flag:
                 argsDict[flag] = {"value": arg}
                 flag = None  # Reinit flag
+            # If Unknow flag:
+            elif arg not in parameters:
+                # TODO: Continue here
+                flag = "error"
             # If no flag:
             elif flag is None:
                 if parameters[arg]["type"] == "boolean":
@@ -53,21 +58,27 @@ def getArgsDictFromList(argsList):
                 argsDict[flag] = {"value": getDefaultValue(flag)}
                 # Set next flag:
                 flag = arg
-        # If isn't a flag or negative number:
+        elif parameters[flag]["type"] == 'error':
+            # If isn't a flag or negative number:
+            pass
         else:
-            if flag is None:  # If no flag setted
-                print("Error: no flag for '"+arg+"'!")
-            else:
-                flagType = parameters[flag]["type"]
+            flagType = parameters[flag]["type"]
 
-                # Check type:
-                if flagType is "integer":
+            # Check type:
+            if flagType is "integer":
+                if arg.isdigit():
                     argsDict[flag] = {"value": int(arg)}
-                    flag = None  # Reinit flag
+                else:
+                    argsDict[flag] = {"value": 0}
+                flag = None  # Reinit flag
 
-                elif flagType is "string":
-                    argsDict[flag] = {"value": arg}
-                    flag = None  # Reinit flag
+            elif flagType is "string":
+                argsDict[flag] = {"value": str(arg)}
+                flag = None  # Reinit flag
+
+            else:
+                argsDict[flag] = {"value": str(arg)}
+                flag = None  # Reinit flag
 
     return argsDict
 
@@ -78,13 +89,11 @@ def getSchema(args):
     argsDescription = "\nYou give this flags and values:"
     argsDict = getArgsDictFromList(args)
 
-    # TODO: Get flag and values if not gived
-
     for arg in argsDict:
         # Name
         text = "\n-{}, {}".format(arg, parameters[arg]['name'])
         # Value
-        text += ", value:{}".format(argsDict[arg]['value'])
+        text += ", value: {}".format(argsDict[arg]['value'])
         if argsDict[arg]['value'] == parameters[arg]['default_value']:
             text += " (default)"
         # Description

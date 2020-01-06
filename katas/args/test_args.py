@@ -20,6 +20,8 @@ def test_getArgsDictFromList():
     assert getArgsDictFromList(argsListWithoutValues)["l"]['value'] is True
     assert getArgsDictFromList(argsListWithoutValues)["p"]['value'] is 0
     assert getArgsDictFromList(["-d"])["d"]['value'] is ""
+    # Check wrong flag
+    assert type(getArgsDictFromList(argsList)["l"]) is dict
 
 
 def test_getDefautValue():
@@ -37,3 +39,7 @@ def test_getSchema():
     args = ['-l', '-p', '8080', '-d', '/usr/logs']
     # Check type
     assert type(getSchema(args)) is str
+    # Check wrong flag
+    assert type(getSchema(['-t', '200'])) is str
+    assert type(getSchema(['-t'])) is str
+    assert type(getSchema(['bad'])) is str
