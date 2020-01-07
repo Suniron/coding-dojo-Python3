@@ -60,7 +60,7 @@ def getArgsDictFromList(argsList):
                 flag = arg
         elif parameters[flag]["type"] == 'error':
             # If isn't a flag or negative number:
-            pass
+            continue
         else:
             flagType = parameters[flag]["type"]
 
@@ -84,11 +84,19 @@ def getArgsDictFromList(argsList):
 
 
 def getSchema(args):
-    "Return a description of flag/args used"
+    "Return a description (as string) of flag/args used"
 
-    argsDescription = "\nYou give this flags and values:"
+    argsDescription = "\nGived flags and values:"
     argsDict = getArgsDictFromList(args)
 
+    # Check if all arg are set:
+    for p in parameters:
+        if p == 'error':
+            continue
+        if p not in argsDict:
+            argsDict[p] = {'value': getDefaultValue(p)}
+
+    # Make description:
     for arg in argsDict:
         # Name
         text = "\n-{}, {}".format(arg, parameters[arg]['name'])
